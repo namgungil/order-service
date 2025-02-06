@@ -4,6 +4,13 @@ WORKDIR /myapp
 # 호스트머신에 소스코드를 이미지작업 디렉토리로 복사
 COPY . /myapp
 
+# gradle 종속성을 먼저 복사해서 저장
+COPY gradle /myapp/gradle
+COPY gradlew /myapp/
+COPY build.gradle settings.gradle /myapp/
+
+# gradlew를 실행할 수 있는 권한을 추가
+RUN chmod +x gradlew
 # 이전 빌드에서 생성된 모든 build/ 디렉토리 내용을 삭제, 새롭게 빌드
 # 프로젝트를 빌드
 # --no-daemon은 데몬을 이용하지 않고 빌드
@@ -11,8 +18,8 @@ COPY . /myapp
 # gradlew는 프로젝트에 포함된 gradle을 이용
 # CICD에서는 gradlew를 이용해서 작업
 # -x test -> test를 제외하고 작업
-# gradlew를 실행할 수 있는 권한을 추가
-RUN chmod +x gradlew
+# gradle 종속성을 다운로드
+RUN ./gradlew dependencies --no-daemon
 RUN ./gradlew clean build --no-daemon -x test
 
 # 자바를 실행하기 위한 작업
